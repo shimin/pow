@@ -1,0 +1,11 @@
+syntax = "proto3";
+package proto;
+option go_package = "internal/proto;proto";
+
+message Packet{
+    bytes data = 1;
+}
+
+service AuthService {
+    rpc AuthFlow(stream Packet) returns (stream Packet);
+}
