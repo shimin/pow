@@ -33,13 +33,13 @@ func (h *Handler) AuthFlow(stream proto.AuthService_AuthFlowServer) error {
 		h.log.Error(err)
 		return err
 	}
-	data = answer.GetData()
-	if len(data) != 8 {
+	solution := answer.GetData()
+	if len(solution) != 8 {
 		h.log.Error("answer size is wrong")
 		return errors.New("answer size is wrong")
 	}
 
-	ok := pow.Validate(data, targetBits, binary.LittleEndian.Uint64(data))
+	ok := pow.Validate(data, targetBits, binary.LittleEndian.Uint64(solution))
 	if ok {
 		h.log.Infof("Validation passed")
 		stream.Send(&proto.Packet{
