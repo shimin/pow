@@ -7,28 +7,22 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
-	"time"
 
 	"github.com/shimin/pow/internal/pow"
-	"github.com/shimin/pow/internal/proto"
 	"github.com/shimin/pow/internal/utils"
+	"github.com/shimin/pow/proto"
 	"go.uber.org/zap"
-)
-
-// move to config
-const (
-	host          = "127.0.0.1:5000"
-	targetBits    = 24
-	retries       = 2
-	retryInterval = 2 * time.Second
-	connTimeout   = 2 * time.Second
-	grpcPingTime  = 30 * time.Second
 )
 
 func main() {
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 	sugar := logger.Sugar()
+
+	cfg, err := LoadConfig("./")
+	if err != nil {
+		sugar.Fatal("cannot load config:", err)
+	}
 
 	sigquit := make(chan os.Signal, 1)
 	signal.Notify(sigquit, syscall.SIGINT, syscall.SIGTERM)
@@ -48,7 +42,7 @@ func main() {
 		}
 	}()
 
-	connector := utils.NewGrpcClientConnector(sugar, host, retries, retryInterval, connTimeout, connTimeout)
+	connector := utils.NewGrpcClientConnector(sugar, cfg.Host, cfg.Retries, cfg.RetryInterval, cfg.ConnTimeout, cfg.ConnTimeout)
 	conn, err := connector.GrpcConnectWithRetry(ctx)
 
 	if err != nil && ctx.Err() == nil {
@@ -87,7 +81,7 @@ func main() {
 			return
 		}
 
-		result := pow.Calc(ctx, data, targetBits)
+		result := pow.Calc(ctx, data, cfg.TargetBits)
 		buf := make([]byte, 8)
 		binary.LittleEndian.PutUint64(buf, result)
 

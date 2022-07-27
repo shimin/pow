@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  server:
+    restart: always
+    env_file: .env
+    build:
+      dockerfile: build/server.Dockerfile
+      context: .
+
+  client:
+    restart: always
+    env_file: .env
+    build:
+      dockerfile: build/client.Dockerfile
+      context: .
+    depends_on:
+      - server
+    links:
+      - server

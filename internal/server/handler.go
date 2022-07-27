@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"crypto/rand"
@@ -6,22 +6,29 @@ import (
 	"errors"
 
 	"github.com/shimin/pow/internal/pow"
-	"github.com/shimin/pow/internal/proto"
+	"github.com/shimin/pow/internal/wisdom"
+	"github.com/shimin/pow/proto"
 	"go.uber.org/zap"
 )
 
 type Handler struct {
-	log *zap.SugaredLogger
+	log        *zap.SugaredLogger
+	keySize    uint16
+	targetBits uint16
+	quotes     *wisdom.Set
 }
 
-func NewHandler(log *zap.SugaredLogger) *Handler {
+func NewHandler(log *zap.SugaredLogger, keySize, targetBits uint16, quotes *wisdom.Set) *Handler {
 	return &Handler{
-		log: log,
+		log:        log,
+		keySize:    keySize,
+		targetBits: targetBits,
+		quotes:     quotes,
 	}
 }
 
 func (h *Handler) AuthFlow(stream proto.AuthService_AuthFlowServer) error {
-	data := make([]byte, keySize)
+	data := make([]byte, h.keySize)
 	rand.Read(data)
 
 	stream.Send(&proto.Packet{
@@ -39,11 +46,12 @@ func (h *Handler) AuthFlow(stream proto.AuthService_AuthFlowServer) error {
 		return errors.New("answer size is wrong")
 	}
 
-	ok := pow.Validate(data, targetBits, binary.LittleEndian.Uint64(solution))
+	ok := pow.Validate(data, h.targetBits, binary.LittleEndian.Uint64(solution))
 	if ok {
 		h.log.Infof("Validation passed")
+		quote := h.quotes.GetRandQuote()
 		stream.Send(&proto.Packet{
-			Data: []byte("Here is your word of wisdom"),
+			Data: []byte(quote),
 		})
 		return nil
 	}
