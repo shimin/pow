@@ -19,7 +19,7 @@ func main() {
 	defer logger.Sync()
 	sugar := logger.Sugar()
 
-	cfg, err := LoadConfig("./")
+	cfg, err := LoadConfig()
 	if err != nil {
 		sugar.Fatal("cannot load config:", err)
 	}

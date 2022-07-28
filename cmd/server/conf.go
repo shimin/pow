@@ -3,30 +3,19 @@ package main
 import (
 	"time"
 
-	"github.com/spf13/viper"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
-	Host         string        `mapstructure:"SERVER_LISTEN_ADDRESS"` // = ":5000"
-	KeySize      uint16        `mapstructure:"KEY_SIZE"`              // = 40
-	TargetBits   uint16        `mapstructure:"TARGET_BITS"`           // = 24
-	GrpcPingTime time.Duration `mapstructure:"GRPC_PING_TIME"`        // = 30 * time.Second
-	GrpcTimeOut  time.Duration `mapstructure:"GRPC_TIMEOUT"`          // = 60 * time.Second
+	Host         string        `envconfig:"SERVER_LISTEN_ADDRESS"` // = ":5000"
+	KeySize      uint16        `envconfig:"KEY_SIZE"`              // = 40
+	TargetBits   uint16        `envconfig:"TARGET_BITS"`           // = 24
+	GrpcPingTime time.Duration `envconfig:"GRPC_PING_TIME"`        // = 30 * time.Second
+	GrpcTimeOut  time.Duration `envconfig:"GRPC_TIMEOUT"`          // = 60 * time.Second
 }
 
 // LoadConfig reads configuration from file or environment variables.
-func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigName(".env")
-	viper.SetConfigType("env")
-
-	viper.AutomaticEnv()
-
-	err = viper.ReadInConfig()
-	if err != nil {
-		return
-	}
-
-	err = viper.Unmarshal(&config)
+func LoadConfig() (config Config, err error) {
+	err = envconfig.Process("", &config)
 	return
 }

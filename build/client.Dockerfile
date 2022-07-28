@@ -7,6 +7,7 @@ RUN  go mod download
 
 COPY cmd/client cmd/client
 COPY internal   internal
+COPY proto      proto
 
 RUN cd /opt/cmd/client && \
     go build -o /srv/client
