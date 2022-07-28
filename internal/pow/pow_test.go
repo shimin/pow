@@ -3,6 +3,7 @@ package pow
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
 	"testing"
 )
 
@@ -68,13 +69,26 @@ func Test_PowCalcValidate(t *testing.T) {
 	}
 }
 
+var table = []struct {
+	complexity uint16
+}{
+	{complexity: 2},
+	{complexity: 8},
+	{complexity: 16},
+	{complexity: 20},
+	{complexity: 24},
+	{complexity: 25},
+}
+
 func BenchmarkCalculateProof(b *testing.B) {
 	data := generatePhrase(40)
-	var targetBits uint16 = 25
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Calc(context.Background(), data, targetBits)
+	for _, v := range table {
+		b.Run(fmt.Sprintf("target_bits_%d", v.complexity), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				Calc(context.Background(), data, v.complexity)
+			}
+		})
 	}
 }
 
@@ -82,11 +96,14 @@ func BenchmarkCheckProof(b *testing.B) {
 	data := generatePhrase(40)
 	var targetBits uint16 = 25
 
-	ans := Calc(context.Background(), data, targetBits)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		Validate(data, targetBits, ans)
+	for _, v := range table {
+		ans := Calc(context.Background(), data, targetBits)
+		b.ResetTimer()
+		b.Run(fmt.Sprintf("target_bits_%d", v.complexity), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				Validate(data, targetBits, ans)
+			}
+		})
 	}
 }
 
