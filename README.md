@@ -29,7 +29,8 @@ docker logs <container_name> -f
 ```
 
 ### Encryption algorythm
-Hashcash is based on SHA256
-SHA-256 is popular and presented in standart go package
-simple validation
+- Hashcash is based on SHA256
+- SHA-256 is popular and presented in standart go package
+- simple validation
 
+### Benchmarks
