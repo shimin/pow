@@ -1,6 +1,6 @@
 ## Word of Wisdom tcp server
 
-Demonstrates client-server communication based on "Hashcash" POW algorythm.
+Demonstrates client-server communication based on Hashcash POW algorythm.
 1. Client connects to the server
 2. Client starts auth process and gets challenge task to solve.
 3. As soon as calculated the solution has to be sent to the server for quick validation.
@@ -31,7 +31,6 @@ docker logs <container_name> -f
 ```
 
 ### Encryption algorythm
-- Hashcash is based on SHA256
 - SHA-256 is popular and presented in standart go package
 - simple validation
 
